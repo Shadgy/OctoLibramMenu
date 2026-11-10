@@ -52,6 +52,6 @@ The **Locked** setting blocks panel and minimap movement. pfUI may collect the m
 
 Version **0.2.1** uses the Vanilla Lua 5.0 API and requires no external addon library. It loads its UI only for paladins. The current item-name filtering targets the enUS client. Nampower health fields are optional; standard target health APIs are the fallback.
 
-Automated checks cover the exact health boundary, closed-menu alert visibility, target changes, inventory changes, movement modifiers, settings, and manual-swap safeguards. Client rendering and server equipment acceptance are distinct checks; combat swaps remain subject to the server.
+**46 automated behavioral checks pass**, covering the exact health boundary, closed-menu alert visibility, target changes, inventory changes, movement modifiers, settings, and manual-swap safeguards. A live Octo client check also confirmed the closed-menu shortcut and a successful manual swap during combat. See [VALIDATION.md](VALIDATION.md) for the scope of these checks.
 
 Report reproducible problems in this repository's **Issues**, including the addon version, what you expected, and what happened. Do not include account credentials or private SavedVariables files.
