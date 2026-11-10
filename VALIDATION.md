@@ -11,7 +11,20 @@ Checked on 2026-11-10.
 - Eleven source hashes and eleven converted WAV hashes match the recorded manifest. Active recordings are distinct, non-silent PCM16 mono 22050 Hz WAVs, 0.855–2.900 seconds long; LoL is 0.900 seconds. Peaks are at or below -3 dBFS. Waveform edges return to zero; short tail fades avoid discontinuities.
 - The package retains ten legacy Kenney WAVs; they are not active menu options. New source, ownership and three SharedMedia CC BY 3.0 author notices are included. This is provenance documentation, not a legal clearance opinion for the game/pop-culture recordings.
 
-These are offline behavior, file and layout checks. In-game playback and subjective listening have not been verified by these checks. Restart the client and use Sound → Play sample to audition the recordings.
+These behavior, file and layout checks were followed by the live-client verification below. Restart the client after updating and use Sound → Play sample to audition the recordings.
+
+## 0.3.2 live Octo client check
+
+Checked on 2026-11-10 with the client reporting version **0.3.2** and sound choice **LoL - Retreat Ping**.
+
+- With the flyout open, selecting a living hostile target at **32/112 HP (28.6%)** triggered one automatic alert. The Final Judgement reminder was visibly highlighted.
+- With the flyout closed, selecting a living hostile target at **12/132 HP (9.1%)** triggered one automatic alert. The separate highlighted Final Judgement shortcut remained visible while the flyout stayed closed.
+- Both trials used the client's normal target-change event, rather than a manual sound preview. A temporary observer forwarded the original sound method and counted one call in each trial, with no repeated alert while the target remained below the threshold.
+- System-output recordings independently matched the shipped LoL cue at the expected target-change times in both trials. This verifies playback in the captured output; it is not a subjective listening review of all eleven recordings.
+- Installed files matched all **36 release-package files**. The installation had preserved all **3,313 checked settings files**. Live checks confirmed retained panel preferences, position and the existing cycle binding.
+- The sound and persistent-menu switches used during testing were restored to their previous values. The live settings matched the pre-test snapshot, the original sound method was restored, and temporary test globals were cleared. Sound had previously been disabled and was left disabled; enable **Play an alert sound** to use the ping.
+
+These live trials selected targets already below 35%; they did not exercise a live health transition through exactly 35%. The exact boundary and values immediately above it remain covered by automated tests. Bosses-only filtering was not tested against a live boss in this session. No runtime change was needed after the live check; version **0.3.2** remains the current build.
 
 ## 0.3.1 checks
 
