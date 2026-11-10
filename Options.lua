@@ -302,7 +302,7 @@ function M:CreateSoundOptions(page)
     self.soundMenu = CreateFrame("Frame", "OctoLibramMenuSoundMenu", page)
     self.soundMenu:SetWidth(468)
     self.soundMenu:SetHeight(12 + math.ceil(table.getn(self.SOUNDS or {}) / 2) * 28)
-    -- Open above the selector: ten choices fit inside the dialog without
+    -- Open above the selector: eleven choices fit inside the dialog without
     -- reaching its footer or Close button.
     self.soundMenu:SetPoint("BOTTOMLEFT", self.soundChoiceButton, "TOPLEFT", 0, 2)
     self.soundMenu:SetFrameLevel(page:GetFrameLevel() + 8)

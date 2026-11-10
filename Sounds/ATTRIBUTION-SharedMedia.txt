@@ -1,0 +1,28 @@
+SharedMedia alert recordings
+
+Air Horn (original file: AirHorn.ogg)
+Author: Mike Koenig
+Original source: https://soundbible.com/1542-Air-Horn.html
+Provided through: https://github.com/WeakAuras/WeakAuras_SharedMedia/blob/main/Sounds/AirHorn.ogg
+License: Creative Commons Attribution 3.0 Unported
+https://creativecommons.org/licenses/by/3.0/
+
+Boxing Arena Gong (original file: BoxingArenaSound.ogg)
+Author: Samantha Enrico
+Provided through: https://github.com/WeakAuras/WeakAuras_SharedMedia/blob/main/Sounds/BoxingArenaSound.ogg
+License: Creative Commons Attribution 3.0 Unported
+https://creativecommons.org/licenses/by/3.0/
+
+Warning Siren (original file: WarningSiren.ogg)
+Author: snottyboy
+Provided through: https://github.com/WeakAuras/WeakAuras_SharedMedia/blob/main/Sounds/WarningSiren.ogg
+License: Creative Commons Attribution 3.0 Unported
+https://creativecommons.org/licenses/by/3.0/
+
+Author and license mapping:
+https://github.com/WeakAuras/WeakAuras_SharedMedia/blob/main/Provided%20by.txt
+
+Changes for OctoLibramMenu: decoded and resampled to mono PCM16 22050 Hz WAV,
+silence trimmed, levels adjusted, and brief onset/tail fades applied. Warning Siren
+was shortened to 2.9 seconds with a tail fade. The original authors do not
+endorse this addon.

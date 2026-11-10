@@ -1,4 +1,4 @@
-# OctoLibramMenu 0.3.1
+# OctoLibramMenu 0.3.2
 
 A compact paladin libram menu for **OctoWoW, WoW 1.12.1 / Interface 11200**. All addon messages, tooltips, settings and binding labels are in English.
 
@@ -44,9 +44,9 @@ The same actions are available under **OctoLibramMenu** in the game's native Key
 
 ### Sound
 
-The **Sound** tab includes **Play an alert sound**, **Bosses only**, ten short cues from [Kenney Interface Sounds](https://kenney.nl/assets/interface-sounds), and **Play sample**. Choose **Glass ping**, **Soft pluck**, **Glass bell**, **Bong**, **Bright glass**, **Pluck**, **Confirmation**, **Confirmation 2**, **Question** or **Select**. The picker shows all ten choices in two columns.
+The **Sound** tab includes **Play an alert sound**, **Bosses only**, eleven short recordings, and **Play sample**. **LoL - Retreat Ping** is the default. Other choices are **Metal Gear - Alert**, **Mortal Kombat - Finish Him**, **Mario - Coin**, **Sonic - Ring**, **Vine Boom**, **Windows XP - Error**, **Law and Order - Dun Dun**, **Air Horn**, **Boxing Arena Gong** and **Warning Siren**. The picker shows all eleven in two columns.
 
-The audio is bundled under CC0, converted to mono 16-bit PCM WAV for the older client. See [sound sources and license](Sounds/SOURCES.md). The original three sound selections keep their saved IDs and now use the corresponding new cues; all other preferences are preserved.
+Each recording is shorter than three seconds and uses mono 16-bit PCM WAV for the older client. See [sound sources, ownership and attribution](Sounds/SOURCES.md). Retired Kenney sound selections migrate to the new LoL default; position, keys, sound enable/boss-only switches and other preferences are preserved. Once you select one of the new sounds, it remains selected on later logins. Sound remains disabled on a fresh installation until you enable it.
 
 A ping plays once when a living hostile target enters **≤35% HP**, including when a newly selected target is already below the threshold. Repeated HP events and timer updates do not repeat it. Healing above 35% rearms the next crossing. Changing sound settings while the same target remains below the threshold does not replay the alert; use Play sample to preview it.
 

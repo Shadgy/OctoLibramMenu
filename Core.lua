@@ -1,19 +1,19 @@
 -- WoW 1.12 / Lua 5.0. No automatic equipment changes.
-OctoLibramMenu = { VERSION = "0.3.1", SLOT = 18, FINAL_ID = 58240,
+OctoLibramMenu = { VERSION = "0.3.2", SLOT = 18, FINAL_ID = 58240,
     FINAL_NAME = "Libram of Final Judgement", items = {}, elapsed = 0, scanElapsed = 0 }
 local M = OctoLibramMenu
 M.SOUNDS = {
-    -- Keep the first three IDs so existing sound selections survive updates.
-    { id = "PING", name = "Glass ping", sound = "Interface\\AddOns\\OctoLibramMenu\\Sounds\\Ping.wav" },
-    { id = "SOFT", name = "Soft pluck", sound = "Interface\\AddOns\\OctoLibramMenu\\Sounds\\Soft.wav" },
-    { id = "BELL", name = "Glass bell", sound = "Interface\\AddOns\\OctoLibramMenu\\Sounds\\Bell.wav" },
-    { id = "BONG", name = "Bong", sound = "Interface\\AddOns\\OctoLibramMenu\\Sounds\\Bong.wav" },
-    { id = "GLASS", name = "Bright glass", sound = "Interface\\AddOns\\OctoLibramMenu\\Sounds\\Glass.wav" },
-    { id = "PLUCK", name = "Pluck", sound = "Interface\\AddOns\\OctoLibramMenu\\Sounds\\Pluck.wav" },
-    { id = "CONFIRM", name = "Confirmation", sound = "Interface\\AddOns\\OctoLibramMenu\\Sounds\\Confirm.wav" },
-    { id = "CONFIRM2", name = "Confirmation 2", sound = "Interface\\AddOns\\OctoLibramMenu\\Sounds\\Confirm2.wav" },
-    { id = "QUESTION", name = "Question", sound = "Interface\\AddOns\\OctoLibramMenu\\Sounds\\Question.wav" },
-    { id = "SELECT", name = "Select", sound = "Interface\\AddOns\\OctoLibramMenu\\Sounds\\Select.wav" }
+    { id = "LOL", name = "LoL - Retreat Ping", sound = "Interface\\AddOns\\OctoLibramMenu\\Sounds\\LoLDanger.wav" },
+    { id = "MGS", name = "Metal Gear - Alert", sound = "Interface\\AddOns\\OctoLibramMenu\\Sounds\\MetalGear.wav" },
+    { id = "FINISH", name = "Mortal Kombat - Finish Him", sound = "Interface\\AddOns\\OctoLibramMenu\\Sounds\\FinishHim.wav" },
+    { id = "MARIO", name = "Mario - Coin", sound = "Interface\\AddOns\\OctoLibramMenu\\Sounds\\MarioCoin.wav" },
+    { id = "SONIC", name = "Sonic - Ring", sound = "Interface\\AddOns\\OctoLibramMenu\\Sounds\\SonicRing.wav" },
+    { id = "VINE", name = "Vine Boom", sound = "Interface\\AddOns\\OctoLibramMenu\\Sounds\\VineBoom.wav" },
+    { id = "WINDOWS", name = "Windows XP - Error", sound = "Interface\\AddOns\\OctoLibramMenu\\Sounds\\WindowsError.wav" },
+    { id = "DUNDUN", name = "Law and Order - Dun Dun", sound = "Interface\\AddOns\\OctoLibramMenu\\Sounds\\DunDun.wav" },
+    { id = "AIRHORN", name = "Air Horn", sound = "Interface\\AddOns\\OctoLibramMenu\\Sounds\\AirHorn.wav" },
+    { id = "GONG", name = "Boxing Arena Gong", sound = "Interface\\AddOns\\OctoLibramMenu\\Sounds\\BoxingGong.wav" },
+    { id = "SIREN", name = "Warning Siren", sound = "Interface\\AddOns\\OctoLibramMenu\\Sounds\\WarningSiren.wav" }
 }
 
 function M:Message(text)
@@ -224,8 +224,13 @@ function M:Initialize()
     self.db = OctoLibramMenuDB
     local defaults = { scale = 1, shown = true, locked = false, keepOpen = false, direction = "RIGHT", columns = 4,
         showMinimap = true, showTooltips = true, alertEnabled = true, minimapAngle = 225,
-        soundEnabled = false, soundBossesOnly = false, soundChoice = "PING" }
+        soundEnabled = false, soundBossesOnly = false, soundChoice = "LOL" }
     for key, value in pairs(defaults) do if self.db[key] == nil then self.db[key] = value end end
+    -- Retired cue IDs migrate to the new default; current selections survive
+    -- later logins. All other saved preferences remain in the same table.
+    local validSound = false
+    for _, sound in ipairs(self.SOUNDS) do if self.db.soundChoice == sound.id then validSound = true; break end end
+    if not validSound then self.db.soundChoice = "LOL" end
     self.db.scale = math.max(0.6, math.min(2, tonumber(self.db.scale) or 1))
     self.db.columns = math.max(1, math.min(8, math.floor(tonumber(self.db.columns) or 4)))
     if self.db.direction ~= "LEFT" then self.db.direction = "RIGHT" end

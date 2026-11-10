@@ -2,6 +2,17 @@
 
 Checked on 2026-11-10.
 
+## 0.3.2 checks
+
+- **74 behavioral cases passed:** 32 core, 9 bindings and 33 UI integration cases. Lua syntax and the project's Lua 5.0 / Vanilla checks passed.
+- All eleven unique IDs and exact preview paths are covered. Retired Kenney choices and invalid/missing IDs migrate to LoL; all other preferences remain intact. Every new selection survives a later login.
+- All eleven buttons select silently until Play sample is clicked. Existing 35% threshold, boss filtering and no-repeat behavior pass.
+- The two-column, six-row picker was rendered from actual frame geometry and visually checked with its final Retreat Ping label. All options fit inside the dialog and clear the selector, footer and Close button.
+- Eleven source hashes and eleven converted WAV hashes match the recorded manifest. Active recordings are distinct, non-silent PCM16 mono 22050 Hz WAVs, 0.855–2.900 seconds long; LoL is 0.900 seconds. Peaks are at or below -3 dBFS. Waveform edges return to zero; short tail fades avoid discontinuities.
+- The package retains ten legacy Kenney WAVs; they are not active menu options. New source, ownership and three SharedMedia CC BY 3.0 author notices are included. This is provenance documentation, not a legal clearance opinion for the game/pop-culture recordings.
+
+These are offline behavior, file and layout checks. In-game playback and subjective listening have not been verified by these checks. Restart the client and use Sound → Play sample to audition the recordings.
+
 ## 0.3.1 checks
 
 - **72 behavioral cases passed:** 30 core, 9 bindings and 33 UI integration cases. Lua syntax and the project's Lua 5.0 / Vanilla checks passed.

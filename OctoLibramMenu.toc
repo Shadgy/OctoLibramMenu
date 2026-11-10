@@ -1,7 +1,7 @@
 ## Interface: 11200
 ## Title: OctoLibramMenu
 ## Author: Octo
-## Version: 0.3.1
+## Version: 0.3.2
 ## Notes: Libram menu, configurable key bindings, and a 35% health reminder with optional boss-only sound. /olm
 ## SavedVariablesPerCharacter: OctoLibramMenuDB
 Bosses.lua

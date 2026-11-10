@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.2
+
+- Replace the active Kenney picker with eleven recognizable game, pop-culture and raid-alert recordings.
+- Use LoL - Retreat Ping as the default, with Metal Gear, Finish Him, Mario, Sonic, Vine Boom, Windows XP, Law and Order, Air Horn, Boxing Arena Gong and Warning Siren as alternatives.
+- Migrate retired sound IDs to LoL while preserving position, key bindings, sound enable/boss-only switches and all other character preferences. Current choices persist across later logins.
+- Show all eleven choices in two columns. Play sample remains an explicit action.
+- Bundle PCM16 mono 22050 Hz WAVs, each under three seconds, with bounded sample peaks and smooth edges. The default LoL recording keeps its full 0.9-second decay.
+- Add source, ownership and attribution notices. Retain legacy Kenney files and their notice for compatibility with existing addon folders.
+- Restart the game after updating to load the new audio files.
+
 ## 0.3.1
 
 - Replace the three synthesized cues with ten short cues from Kenney Interface Sounds (CC0).

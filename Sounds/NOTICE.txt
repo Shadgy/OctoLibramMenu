@@ -1,0 +1,26 @@
+OctoLibramMenu is an unofficial, noncommercial fan project.
+
+Third-party recording notices
+
+LoLDanger.wav: League of Legends Retreat Ping; associated with Riot Games.
+MetalGear.wav: Metal Gear Solid alert; associated with Konami.
+FinishHim.wav: Mortal Kombat "Finish Him"; associated with NetherRealm / Warner Bros.
+MarioCoin.wav: Mario coin sound; associated with Nintendo.
+SonicRing.wav: Sonic ring sound; associated with SEGA.
+WindowsError.wav: Windows XP error sound; associated with Microsoft.
+DunDun.wav: Law & Order scene-transition sound; associated with its original
+creators and television rights holders.
+VineBoom.wav: Vine Boom recording from the linked community soundboard;
+the original recording's rights holder was not established from that page.
+
+These recordings remain third-party material. This addon does not claim
+ownership, an open-content license, or endorsement by their creators or
+associated companies. They are not covered by the Kenney CC0 notice or the
+SharedMedia CC BY notices. Source references and audio modifications are
+documented in SOURCES.md.
+
+AirHorn.wav, BoxingGong.wav and WarningSiren.wav have separate CC BY 3.0
+attribution in ATTRIBUTION-SharedMedia.txt.
+
+The ten retained legacy Kenney files have their separate CC0 author notice
+in LICENSE-Kenney.txt. They are not active sound-picker options in 0.3.2.
