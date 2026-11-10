@@ -1,11 +1,19 @@
 -- WoW 1.12 / Lua 5.0. No automatic equipment changes.
-OctoLibramMenu = { VERSION = "0.3.0", SLOT = 18, FINAL_ID = 58240,
+OctoLibramMenu = { VERSION = "0.3.1", SLOT = 18, FINAL_ID = 58240,
     FINAL_NAME = "Libram of Final Judgement", items = {}, elapsed = 0, scanElapsed = 0 }
 local M = OctoLibramMenu
 M.SOUNDS = {
-    { id = "PING", name = "Ping", sound = "Interface\\AddOns\\OctoLibramMenu\\Sounds\\Ping.wav" },
-    { id = "SOFT", name = "Soft ping", sound = "Interface\\AddOns\\OctoLibramMenu\\Sounds\\Soft.wav" },
-    { id = "BELL", name = "Bell", sound = "Interface\\AddOns\\OctoLibramMenu\\Sounds\\Bell.wav" }
+    -- Keep the first three IDs so existing sound selections survive updates.
+    { id = "PING", name = "Glass ping", sound = "Interface\\AddOns\\OctoLibramMenu\\Sounds\\Ping.wav" },
+    { id = "SOFT", name = "Soft pluck", sound = "Interface\\AddOns\\OctoLibramMenu\\Sounds\\Soft.wav" },
+    { id = "BELL", name = "Glass bell", sound = "Interface\\AddOns\\OctoLibramMenu\\Sounds\\Bell.wav" },
+    { id = "BONG", name = "Bong", sound = "Interface\\AddOns\\OctoLibramMenu\\Sounds\\Bong.wav" },
+    { id = "GLASS", name = "Bright glass", sound = "Interface\\AddOns\\OctoLibramMenu\\Sounds\\Glass.wav" },
+    { id = "PLUCK", name = "Pluck", sound = "Interface\\AddOns\\OctoLibramMenu\\Sounds\\Pluck.wav" },
+    { id = "CONFIRM", name = "Confirmation", sound = "Interface\\AddOns\\OctoLibramMenu\\Sounds\\Confirm.wav" },
+    { id = "CONFIRM2", name = "Confirmation 2", sound = "Interface\\AddOns\\OctoLibramMenu\\Sounds\\Confirm2.wav" },
+    { id = "QUESTION", name = "Question", sound = "Interface\\AddOns\\OctoLibramMenu\\Sounds\\Question.wav" },
+    { id = "SELECT", name = "Select", sound = "Interface\\AddOns\\OctoLibramMenu\\Sounds\\Select.wav" }
 }
 
 function M:Message(text)

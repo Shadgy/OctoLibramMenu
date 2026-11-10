@@ -300,19 +300,24 @@ function M:CreateSoundOptions(page)
     self.soundPreviewButton:SetPoint("TOPLEFT", page, "TOPLEFT", 361, -300)
     self.soundPreviewButton:SetScript("OnClick", function() M:PlayAlertSound(true) end)
     self.soundMenu = CreateFrame("Frame", "OctoLibramMenuSoundMenu", page)
-    self.soundMenu:SetWidth(324)
-    self.soundMenu:SetHeight(12 + table.getn(self.SOUNDS or {}) * 28)
-    self.soundMenu:SetPoint("TOPLEFT", self.soundChoiceButton, "BOTTOMLEFT", 0, -2)
+    self.soundMenu:SetWidth(468)
+    self.soundMenu:SetHeight(12 + math.ceil(table.getn(self.SOUNDS or {}) / 2) * 28)
+    -- Open above the selector: ten choices fit inside the dialog without
+    -- reaching its footer or Close button.
+    self.soundMenu:SetPoint("BOTTOMLEFT", self.soundChoiceButton, "TOPLEFT", 0, 2)
     self.soundMenu:SetFrameLevel(page:GetFrameLevel() + 8)
     self.soundMenu:EnableMouse(true)
+    self.soundMenu:SetClampedToScreen(true)
     self.soundMenu:SetBackdrop({ bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
         edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border", tile = true, tileSize = 16, edgeSize = 12,
         insets = { left = 3, right = 3, top = 3, bottom = 3 } })
     self.soundMenu:SetBackdropColor(0.05, 0.05, 0.05, 1)
     self.soundButtons = {}
     for i, sound in ipairs(self.SOUNDS or {}) do
-        local choice = button(self.soundMenu, "OctoLibramMenuSound" .. i, sound.name, 312, 24)
-        choice:SetPoint("TOPLEFT", self.soundMenu, "TOPLEFT", 6, -6 - (i - 1) * 28)
+        local row = math.floor((i - 1) / 2)
+        local column = (i - 1) - row * 2
+        local choice = button(self.soundMenu, "OctoLibramMenuSound" .. i, sound.name, 226, 24)
+        choice:SetPoint("TOPLEFT", self.soundMenu, "TOPLEFT", 6 + column * 230, -6 - row * 28)
         choice.soundID = sound.id
         choice:SetScript("OnClick", function() M:SetOption("soundChoice", this.soundID); M.soundMenu:Hide() end)
         self.soundButtons[i] = choice

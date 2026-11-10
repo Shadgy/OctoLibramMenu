@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.1
+
+- Replace the three synthesized cues with ten short cues from Kenney Interface Sounds (CC0).
+- Add Glass ping, Soft pluck, Glass bell, Bong, Bright glass, Pluck, Confirmation, Confirmation 2, Question and Select.
+- Show all ten choices in a two-column picker above the sound selector.
+- Bundle 22,050 Hz mono 16-bit PCM WAVs, with matched whole-cue RMS levels and a sample-peak ceiling.
+- Preserve the original three saved sound IDs and all other character preferences.
+- Include the author's license notice and the exact original-file mapping.
+- Restart the game after updating to load the new audio assets.
+
 ## 0.3.0
 
 - Use English throughout messages, tooltips, settings and binding descriptions.

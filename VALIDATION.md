@@ -2,6 +2,17 @@
 
 Checked on 2026-11-10.
 
+## 0.3.1 checks
+
+- **72 behavioral cases passed:** 30 core, 9 bindings and 33 UI integration cases. Lua syntax and the project's Lua 5.0 / Vanilla checks passed.
+- Ten unique sound IDs and file paths, exact preview dispatch for all ten, and retention of the three previous saved IDs and other preferences were checked.
+- All ten menu buttons select without playing a sound; Play sample remains an explicit action. Threshold, boss-only and no-repeat behavior still pass.
+- The two-column picker was rendered from actual frame geometry and visually reviewed. Tests also check all buttons fit inside the dialog without overlapping each other, the selector or footer.
+- All ten audio files match the conversion manifest and are distinct, non-silent PCM16 mono 22,050 Hz WAVs, 0.100–0.692 seconds long. Whole-cue RMS is -22 dBFS; sample peaks remain at or below -3 dBFS.
+- The downloaded upstream ZIP checksum and its CC0 author notice were checked. The release includes the notice and original-file mapping in `Sounds`.
+
+These are offline behavior, asset and layout checks. In-game playback and a subjective listening review of the new cues have not been verified by these checks. Use Sound → Play sample to audition the cues in your client.
+
 ## 0.3.0 automated checks
 
 - 28 core behavioral cases, 9 binding cases and 31 UI integration cases passed: **68 total**.

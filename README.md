@@ -1,4 +1,4 @@
-# OctoLibramMenu 0.3.0
+# OctoLibramMenu 0.3.1
 
 A compact paladin libram menu for **OctoWoW, WoW 1.12.1 / Interface 11200**. All addon messages, tooltips, settings and binding labels are in English.
 
@@ -8,7 +8,7 @@ In **Octo Launcher → Addons → +**, add this custom Git addon:
 
 `https://github.com/Shadgy/OctoLibramMenu`
 
-For manual installation, extract the release ZIP so that `Interface/AddOns/OctoLibramMenu/OctoLibramMenu.toc` exists. Replace the addon files when updating; keep your `WTF` folder and saved settings. **Restart the game after installing 0.3.0**, which adds new Lua modules and native key-binding actions.
+For manual installation, extract the release ZIP so that `Interface/AddOns/OctoLibramMenu/OctoLibramMenu.toc` exists. Replace the addon files when updating; keep your `WTF` folder and saved settings. **Restart the game after updating** to load the new addon files and audio assets.
 
 The addon loads its UI only for paladins. Existing position, scale, visibility and menu settings are preserved. Sound is disabled by default; no default keys are assigned.
 
@@ -44,7 +44,9 @@ The same actions are available under **OctoLibramMenu** in the game's native Key
 
 ### Sound
 
-The **Sound** tab includes **Play an alert sound**, **Bosses only**, a choice of **Ping**, **Soft ping** or **Bell**, and **Play sample**.
+The **Sound** tab includes **Play an alert sound**, **Bosses only**, ten short cues from [Kenney Interface Sounds](https://kenney.nl/assets/interface-sounds), and **Play sample**. Choose **Glass ping**, **Soft pluck**, **Glass bell**, **Bong**, **Bright glass**, **Pluck**, **Confirmation**, **Confirmation 2**, **Question** or **Select**. The picker shows all ten choices in two columns.
+
+The audio is bundled under CC0, converted to mono 16-bit PCM WAV for the older client. See [sound sources and license](Sounds/SOURCES.md). The original three sound selections keep their saved IDs and now use the corresponding new cues; all other preferences are preserved.
 
 A ping plays once when a living hostile target enters **≤35% HP**, including when a newly selected target is already below the threshold. Repeated HP events and timer updates do not repeat it. Healing above 35% rearms the next crossing. Changing sound settings while the same target remains below the threshold does not replay the alert; use Play sample to preview it.
 
