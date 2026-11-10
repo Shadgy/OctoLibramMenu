@@ -1,0 +1,10 @@
+## Interface: 11200
+## Title: OctoLibramMenu
+## Author: Octo
+## Version: 0.2.1
+## Notes: Libram flyout and Final Judgement reminder at target health <=35%. /olm
+## SavedVariablesPerCharacter: OctoLibramMenuDB
+Core.lua
+UI.lua
+Options.lua
+Bindings.xml

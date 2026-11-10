@@ -1,0 +1,8 @@
+<Bindings>
+    <Binding name="OCTOLIBRAMMENU_FINAL" header="OCTOLIBRAMMENU">
+        OctoLibramMenu:EquipFinal();
+    </Binding>
+    <Binding name="OCTOLIBRAMMENU_TOGGLE">
+        if OctoLibramMenu.ready then OctoLibramMenu:Slash("keepopen"); end
+    </Binding>
+</Bindings>
