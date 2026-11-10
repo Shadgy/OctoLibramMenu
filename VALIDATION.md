@@ -2,18 +2,23 @@
 
 Checked on 2026-11-10.
 
-## Automated checks
+## 0.3.0 automated checks
 
-- 20 core behavioral cases and 26 UI integration cases passed.
+- 28 core behavioral cases, 9 binding cases and 31 UI integration cases passed: **68 total**.
 - Lua syntax and the project's Lua 5.0 / Vanilla API checks passed.
 - Exact 35% qualifies; 35.0001% does not.
 - The shortcut remains visible with the flyout closed, including on login, target changes and inventory changes.
 - Missing Final Judgement, friendly/dead/missing targets and disabled visibility/reminder settings are covered.
 - Alt/Ctrl/Shift movement, settings, minimap interaction and manual equipment-swap safeguards are covered.
+- Sound tests cover one ping per crossing/target entry, silent repeated updates, settings changes and boss-only identification, including player/pet exclusions.
+- Key tests cover explicit direct swaps, confirmed-state cycling, missing items, conflict refusal, active-set saving, rollback failures and keyboard-capture cleanup.
+- All three settings tabs were rendered from actual frame geometry and visually reviewed. The three bundled WAVs were checked as PCM16 mono 22050 Hz audio.
 
 The UI cases execute the addon modules against a simulated WoW API. They are distinct from the live check below.
 
-## Live Octo client check
+The new 0.3.0 key capture and sound features were checked with simulated native APIs and local compatibility review; a full in-game acceptance check of these new features remains separate from those tests.
+
+## Previous live Octo client check
 
 A living hostile target had **26/194 HP** (approximately 13.4%, displayed as 14% by the client).
 
@@ -22,7 +27,7 @@ A living hostile target had **26/194 HP** (approximately 13.4%, displayed as 14%
 3. Clicked the shortcut during combat. The character's relic slot changed to **Libram of Final Judgement**, the shortcut disappeared, and the equipped button glowed.
 4. Restored the previous libram and persistent-menu preference.
 
-The loaded client reported 0.2.0 during this check. The 0.2.1 release retains the same health/reminder/equip logic; its changes add Ctrl/Shift dragging and drag-release click protection. The exact 35% boundary was checked in the automated suite, rather than by changing a live target to exactly that value.
+The loaded client reported 0.2.0 during this check. Later versions retain the visual health/reminder/manual-equip workflow and add the changes documented in the changelog. The exact 35% boundary was checked in the automated suite, rather than by changing a live target to exactly that value.
 
 ## Package and launcher
 

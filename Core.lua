@@ -1,7 +1,12 @@
 -- WoW 1.12 / Lua 5.0. No automatic equipment changes.
-OctoLibramMenu = { VERSION = "0.2.1", SLOT = 18, FINAL_ID = 58240,
+OctoLibramMenu = { VERSION = "0.3.0", SLOT = 18, FINAL_ID = 58240,
     FINAL_NAME = "Libram of Final Judgement", items = {}, elapsed = 0, scanElapsed = 0 }
 local M = OctoLibramMenu
+M.SOUNDS = {
+    { id = "PING", name = "Ping", sound = "Interface\\AddOns\\OctoLibramMenu\\Sounds\\Ping.wav" },
+    { id = "SOFT", name = "Soft ping", sound = "Interface\\AddOns\\OctoLibramMenu\\Sounds\\Soft.wav" },
+    { id = "BELL", name = "Bell", sound = "Interface\\AddOns\\OctoLibramMenu\\Sounds\\Bell.wav" }
+}
 
 function M:Message(text)
     if DEFAULT_CHAT_FRAME then DEFAULT_CHAT_FRAME:AddMessage("|cffffd166OctoLibramMenu:|r " .. text) end
@@ -50,6 +55,7 @@ function M:Scan()
         self.pendingID, self.pendingAt = nil, nil
     end
     if self.Refresh then self:Refresh() end
+    if self.SyncSettings then self:SyncSettings() end
 end
 
 function M:TargetBelowThreshold()
@@ -69,23 +75,99 @@ function M:TargetBelowThreshold()
 end
 
 function M:UpdateAlert()
-    self.alert = self.db.alertEnabled ~= false and self:TargetBelowThreshold() and self.final ~= nil
+    local below = self:TargetBelowThreshold()
+    self.alert = self.db.alertEnabled ~= false and below and self.final ~= nil
     if self.RefreshAlert then self:RefreshAlert() end
+    self:UpdateSound(below)
+end
+
+function M:TargetGUID()
+    if type(UnitGUID) == "function" then
+        local ok, guid = pcall(UnitGUID, "target")
+        if ok and type(guid) == "string" and guid ~= "" then return guid end
+    end
+    if type(GetUnitGUID) == "function" then
+        local ok, guid = pcall(GetUnitGUID, "target")
+        if ok and type(guid) == "string" and guid ~= "" then return guid end
+    end
+    local exists, guid = UnitExists("target")
+    if exists and type(guid) == "string" and guid ~= "" then return guid end
+end
+
+function M:TargetIdentity()
+    if not UnitExists("target") then return nil end
+    local guid = self:TargetGUID()
+    if guid then return guid end
+    local name = type(UnitName) == "function" and UnitName("target") or "target"
+    return (name or "target") .. ":" .. (self.targetSerial or 0)
+end
+
+function M:TargetNpcID()
+    local guid = self:TargetGUID()
+    if not guid then return nil end
+    if string.len(guid) == 18 and string.find(guid, "^0[xX][fF]130%x+$") then
+        return tonumber(string.sub(guid, 7, 12), 16)
+    end
+    local _, _, id = string.find(guid, "^Creature%-%d+%-%d+%-%d+%-%d+%-(%d+)%-")
+    return tonumber(id)
+end
+
+function M:IsBossTarget()
+    if not UnitExists("target") or type(UnitIsPlayer) == "function" and UnitIsPlayer("target") then return false end
+    if type(UnitPlayerControlled) == "function" and UnitPlayerControlled("target") then return false end
+    local guid = self:TargetGUID()
+    if guid and (string.find(guid, "^Pet%-") or string.find(guid, "^0[xX][fF]140")) then return false end
+    local data = OctoLibramMenuBosses
+    local id = self:TargetNpcID()
+    if data and id and data.ids[id] then return true end
+    if type(UnitClassification) == "function" and UnitClassification("target") == "worldboss" then return true end
+    -- An available NPC ID takes priority over a potentially ambiguous name.
+    if id then return false end
+    local name = type(UnitName) == "function" and UnitName("target") or nil
+    -- The generic Chess name 'King' is only safe when its ID is available.
+    return data and name ~= "King" and name and data.names[name] == true or false
+end
+
+function M:PlayAlertSound(preview)
+    local selected
+    for _, sound in ipairs(self.SOUNDS) do if sound.id == self.db.soundChoice then selected = sound; break end end
+    selected = selected or self.SOUNDS[1]
+    if type(PlaySoundFile) ~= "function" then
+        if preview then self:Message("Sound playback is unavailable in this client.") end
+        return false
+    end
+    local ok, result = pcall(PlaySoundFile, selected.sound)
+    if not ok or result == false then
+        if preview then self:Message("The sound could not be played. Check the game's sound settings.") end
+        return false
+    end
+    return true
+end
+
+function M:UpdateSound(below)
+    local key = self:TargetIdentity()
+    local entering = below and key and (not self.soundWasBelow or self.soundTarget ~= key)
+    -- Prime the latch even while muted; changing settings below the threshold
+    -- must not replay a sound on every refresh.
+    self.soundWasBelow, self.soundTarget = below and true or false, key
+    if entering and self.db.soundEnabled and (not self.db.soundBossesOnly or self:IsBossTarget()) then
+        self:PlayAlertSound(false)
+    end
 end
 
 function M:EquipID(id)
     if not self.ready then return false end
-    if UnitIsDeadOrGhost("player") then self:Message("Nie mozna zmienic libramu po smierci."); return false end
-    if CursorHasItem() or SpellIsTargeting() then self:Message("Najpierw oproznij kursor lub zakoncz wybieranie celu czaru."); return false end
+    if UnitIsDeadOrGhost("player") then self:Message("Cannot change librams while dead."); return false end
+    if CursorHasItem() or SpellIsTargeting() then self:Message("Clear the cursor or finish targeting a spell first."); return false end
     -- Re-scan at click time: bag sorting must never equip a stale bag slot.
     self:Scan()
     if self.equipped and self.equipped.id == id then return true end
-    if self.pendingID then self:Message("Poczekaj na wynik poprzedniej podmiany."); return false end
+    if self.pendingID then self:Message("Wait for the previous swap to finish."); return false end
     local chosen
     for _, item in ipairs(self.items) do if item.id == id then chosen = item; break end end
-    if not chosen then self:Message("Tego libramu nie ma w torbach."); return false end
+    if not chosen then self:Message("That libram is not in your bags."); return false end
     local _, _, locked = GetContainerItemInfo(chosen.bag, chosen.slot)
-    if locked or IsInventoryItemLocked(self.SLOT) then self:Message("Przedmiot jest chwilowo zablokowany. Kliknij ponownie."); return false end
+    if locked or IsInventoryItemLocked(self.SLOT) then self:Message("That item is temporarily locked. Try again."); return false end
     self.pendingID, self.pendingAt = id, GetTime()
     -- Same manual swap mechanism as installed TrinketMenu/ItemRack; slot 18
     -- is swappable during combat. Never defer a click to a later combat end.
@@ -119,7 +201,7 @@ function M:Tick(delta)
         self:Scan()
         if self.pendingID then
             self.pendingID, self.pendingAt = nil, nil
-            self:Message("Brak potwierdzenia podmiany. Sprawdz slot libramu i kliknij ponownie.")
+            self:Message("Swap not confirmed. Check your relic slot and try again.")
         end
     end
     self:UpdateAlert()
@@ -133,7 +215,8 @@ function M:Initialize()
     if type(OctoLibramMenuDB) ~= "table" then OctoLibramMenuDB = {} end
     self.db = OctoLibramMenuDB
     local defaults = { scale = 1, shown = true, locked = false, keepOpen = false, direction = "RIGHT", columns = 4,
-        showMinimap = true, showTooltips = true, alertEnabled = true, minimapAngle = 225 }
+        showMinimap = true, showTooltips = true, alertEnabled = true, minimapAngle = 225,
+        soundEnabled = false, soundBossesOnly = false, soundChoice = "PING" }
     for key, value in pairs(defaults) do if self.db[key] == nil then self.db[key] = value end end
     self.db.scale = math.max(0.6, math.min(2, tonumber(self.db.scale) or 1))
     self.db.columns = math.max(1, math.min(8, math.floor(tonumber(self.db.columns) or 4)))
@@ -142,17 +225,22 @@ function M:Initialize()
     self.db.minimapAngle = angle - math.floor(angle / 360) * 360
     self.ready = true
     self:CreateUI()
-    if self.CreateSettingsUI then self:CreateSettingsUI() end
     self:Scan()
+    if self.InitBindings then self:InitBindings() end
+    if self.CreateSettingsUI then self:CreateSettingsUI() end
     self:UpdateAlert()
-    self:Message("Ustawienia: ESC > LibramMenu lub PPM na przycisku minimapy. /olm")
+    self:Message("Settings: ESC > LibramMenu, right-click the minimap button, or /olm.")
 end
 
 function M:OnEvent(name, unit)
     if name == "PLAYER_LOGIN" or name == "PLAYER_ENTERING_WORLD" then self:Initialize() end
     if not self.ready then return end
-    if name == "PLAYER_TARGET_CHANGED" or (name == "UNIT_HEALTH" or name == "UNIT_MAXHEALTH") and unit == "target" then
+    if name == "PLAYER_TARGET_CHANGED" then
+        self.targetSerial = (self.targetSerial or 0) + 1
         self:UpdateAlert()
+    elseif (name == "UNIT_HEALTH" or name == "UNIT_MAXHEALTH") and unit == "target" then
+        self:UpdateAlert()
+    elseif name == "UPDATE_BINDINGS" and self.SyncSettings then self:SyncSettings()
     elseif name == "BAG_UPDATE" or name == "ITEM_LOCK_CHANGED" or name == "PLAYER_ENTERING_WORLD"
         or name == "UNIT_INVENTORY_CHANGED" and unit == "player" then
         self.dirty = true
@@ -162,7 +250,7 @@ end
 function M:SetOption(key, value)
     if not self.ready then return false end
     if key == "shown" or key == "keepOpen" or key == "locked" or key == "showMinimap"
-        or key == "showTooltips" or key == "alertEnabled" then
+        or key == "showTooltips" or key == "alertEnabled" or key == "soundEnabled" or key == "soundBossesOnly" then
         value = value == true or value == 1
     elseif key == "scale" or key == "columns" or key == "minimapAngle" then
         value = tonumber(value)
@@ -172,6 +260,10 @@ function M:SetOption(key, value)
         else value = value - math.floor(value / 360) * 360 end
     elseif key == "direction" then
         if value ~= "LEFT" and value ~= "RIGHT" then return false end
+    elseif key == "soundChoice" then
+        local valid = false
+        for _, sound in ipairs(self.SOUNDS) do if value == sound.id then valid = true end end
+        if not valid then return false end
     else return false end
     self.db[key] = value
     if key == "keepOpen" and not value and self.menu then self.menu:Hide() end
@@ -193,7 +285,7 @@ function M:ResetPosition()
 end
 
 function M:Slash(message)
-    if not self.ready then self:Message("Dodatek jest przeznaczony dla paladyna."); return end
+    if not self.ready then self:Message("This addon is available to paladins only."); return end
     local _, _, command, value = string.find(string.lower(message or ""), "^%s*(%S*)%s*(.-)%s*$")
     if (command == "" or command == "options" or command == "config") and self.OpenOptions then
         self:OpenOptions()
@@ -201,10 +293,10 @@ function M:Slash(message)
         self:SetOption("shown", command == "show")
     elseif command == "lock" or command == "unlock" then
         self:SetOption("locked", command == "lock")
-        self:Message(self.db.locked and "Pozycja zablokowana." or "Pozycja odblokowana: Alt / Ctrl / Shift + przeciagniecie.")
+        self:Message(self.db.locked and "Position locked." or "Position unlocked: Alt / Ctrl / Shift + drag to move.")
     elseif command == "keepopen" then
         self:SetOption("keepOpen", not self.db.keepOpen)
-        self:Message(self.db.keepOpen and "Menu stale otwarte." or "Menu otwierane po najechaniu.")
+        self:Message(self.db.keepOpen and "Libram menu always shown." or "Libram menu opens on hover.")
     elseif command == "left" or command == "right" then
         self:SetOption("direction", string.upper(command))
     elseif command == "scale" and tonumber(value) then
@@ -216,9 +308,10 @@ function M:Slash(message)
     elseif command == "minimap" then
         self:SetOption("showMinimap", not self.db.showMinimap)
     elseif command == "final" then self:EquipFinal()
+    elseif command == "cycle" and self.CycleLibram then self:CycleLibram()
     else
-        self:Message("Najedz: menu | kliknij libram: zaloz | PPM: przypnij/odepnij menu | Alt/Ctrl/Shift + przeciagniecie: przesun.")
-        self:Message("/olm options | show | hide | lock | unlock | keepopen | minimap | left | right | scale 1 | columns 4 | reset | final")
+        self:Message("Hover: select a libram | click: equip | right-click: pin menu | Alt/Ctrl/Shift + drag: move.")
+        self:Message("/olm options | show | hide | lock | unlock | keepopen | minimap | left | right | scale 1 | columns 4 | reset | final | cycle")
     end
 end
 
@@ -226,6 +319,6 @@ local events = CreateFrame("Frame", "OctoLibramMenuEvents")
 events:SetScript("OnEvent", function() M:OnEvent(event, arg1) end)
 events:SetScript("OnUpdate", function() M:Tick(arg1) end)
 for _, name in ipairs({ "PLAYER_LOGIN", "PLAYER_ENTERING_WORLD", "PLAYER_TARGET_CHANGED", "UNIT_HEALTH",
-    "UNIT_MAXHEALTH", "BAG_UPDATE", "UNIT_INVENTORY_CHANGED", "ITEM_LOCK_CHANGED" }) do events:RegisterEvent(name) end
+    "UNIT_MAXHEALTH", "BAG_UPDATE", "UNIT_INVENTORY_CHANGED", "ITEM_LOCK_CHANGED", "UPDATE_BINDINGS" }) do events:RegisterEvent(name) end
 SLASH_OCTOLIBRAMMENU1 = "/olm"
 SlashCmdList["OCTOLIBRAMMENU"] = function(message) M:Slash(message) end

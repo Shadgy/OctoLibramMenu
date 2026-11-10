@@ -48,8 +48,73 @@ function M:SyncSettings()
     getglobal("OctoLibramMenuColumnsText"):SetText("Menu columns: " .. self.db.columns)
     self.directionLeft:SetText(self.db.direction == "LEFT" and "|cffffd166Left|r" or "Left")
     self.directionRight:SetText(self.db.direction == "RIGHT" and "|cffffd166Right|r" or "Right")
+    if self.bindingRows then
+        local choices = self.GetLibramChoices and self:GetLibramChoices() or {}
+        for _, row in ipairs(self.bindingRows) do
+            row.keyButton:SetText(self.GetBindingLabel and self:GetBindingLabel(row.action) or "Not bound")
+            if row.selector then
+                local id
+                if row.index then id = self.db.bindingItems and self.db.bindingItems[row.index]
+                else id = self.db.cycleItemID end
+                local name = id and ("Item " .. id) or "Choose a libram"
+                local available = 0
+                for _, item in ipairs(choices) do if item.id == id then name = item.name; break end end
+                for _, item in ipairs(choices) do
+                    if row.index or item.id ~= self.FINAL_ID then available = available + 1 end
+                end
+                if available > 0 then row.previous:Enable(); row.next:Enable()
+                else
+                    row.previous:Disable(); row.next:Disable()
+                    if not id then name = "Put librams in your bags" end
+                end
+                row.itemLabel:SetText(name)
+            end
+        end
+        if self.captureAction then self.bindingStatus:SetText("Press a key now. Escape cancels; Backspace clears this binding.")
+        else self.bindingStatus:SetText(self.bindingMessage or "Choose a libram, then set a key. Keys use the game's active binding set.") end
+    end
+    if self.soundChoiceButton then
+        for _, sound in ipairs(self.SOUNDS or {}) do
+            if sound.id == self.db.soundChoice then self.soundChoiceButton:SetText(sound.name); break end
+        end
+    end
     self.syncingOptions = nil
     self:UpdateMinimapButton()
+end
+
+function M:SelectOptionsTab(key)
+    if not self.optionPages[key] then return end
+    self.activeOptionsTab = key
+    if self.CancelBindingCapture then self:CancelBindingCapture() end
+    if self.soundMenu then self.soundMenu:Hide() end
+    for name, page in pairs(self.optionPages) do
+        if name == key then page:Show() else page:Hide() end
+        local text = name == "general" and "General" or name == "bindings" and "Key bindings" or "Sound"
+        self.optionTabs[name]:SetText(name == key and ("|cffffd166" .. text .. "|r") or text)
+    end
+    self:SyncSettings()
+end
+
+function M:RotateSelectedLibram(row, direction)
+    local choices = {}
+    for _, item in ipairs(self:GetLibramChoices()) do
+        if row.index or item.id ~= self.FINAL_ID then table.insert(choices, item) end
+    end
+    if table.getn(choices) == 0 then
+        self.bindingMessage = "No librams available. Put a libram in your bags and try again."
+        self:SyncSettings()
+        return
+    end
+    local selected
+    if row.index then selected = self.db.bindingItems[row.index] else selected = self.db.cycleItemID end
+    local index = direction > 0 and 0 or table.getn(choices) + 1
+    for i, item in ipairs(choices) do if item.id == selected then index = i; break end end
+    index = index + direction
+    if index < 1 then index = table.getn(choices) elseif index > table.getn(choices) then index = 1 end
+    if row.index then self:SelectBindingItem(row.index, choices[index].id)
+    else self:SelectCycleItem(choices[index].id) end
+    self.bindingMessage = nil
+    self:SyncSettings()
 end
 
 function M:UpdateMinimapButton()
@@ -160,11 +225,111 @@ function M:InstallGameMenuButton()
     menuButton:SetScript("OnClick", function() M:OpenOptions() end)
 end
 
+function M:CreateBindingOptions(page)
+    label(page, "Select a libram with the arrows, then click its key button.", 27, -117, "GameFontHighlightSmall")
+    self.bindingRows = {}
+    for i = 1, 7 do
+        local row = {}
+        local y = -145 - (i - 1) * 46
+        if i <= 4 then row.index, row.action = i, "OCTOLIBRAMMENU_ITEM" .. i
+        elseif i == 5 then row.action = "OCTOLIBRAMMENU_FINAL"
+        elseif i == 6 then row.action = "OCTOLIBRAMMENU_CYCLE"
+        else row.action = "OCTOLIBRAMMENU_TOGGLE" end
+        local title = i <= 4 and ("Libram " .. i) or i == 5 and "Equip Final Judgement"
+            or i == 6 and "Cycle: Final Judgement <->" or "Pin / unpin libram menu"
+        row.title = label(page, title, 27, y, "GameFontNormalSmall")
+        row.selector = i <= 4 or i == 6
+        if row.selector then
+            row.previous = button(page, "OctoLibramMenuBindingPrevious" .. i, "<", 22, 22)
+            row.previous:SetPoint("TOPLEFT", page, "TOPLEFT", 27, y - 15)
+            row.previous.bindingRow = row
+            row.previous:SetScript("OnClick", function() M:RotateSelectedLibram(this.bindingRow, -1) end)
+            row.next = button(page, "OctoLibramMenuBindingNext" .. i, ">", 22, 22)
+            row.next:SetPoint("TOPLEFT", page, "TOPLEFT", 277, y - 15)
+            row.next.bindingRow = row
+            row.next:SetScript("OnClick", function() M:RotateSelectedLibram(this.bindingRow, 1) end)
+            row.itemLabel = label(page, "Choose a libram", 54, y - 20, "GameFontHighlightSmall")
+            row.itemLabel:SetWidth(218); row.itemLabel:SetJustifyH("LEFT")
+            hint(row.previous, "Previous libram", "Choose from equipped librams, bag items, and saved selections.")
+            hint(row.next, "Next libram", "Choose from equipped librams, bag items, and saved selections.")
+        else
+            row.itemLabel = label(page, i == 5 and self.FINAL_NAME or "Keep the bag menu open or return to hover mode.", 27, y - 20, "GameFontHighlightSmall")
+            row.itemLabel:SetWidth(270); row.itemLabel:SetJustifyH("LEFT")
+        end
+        row.keyButton = button(page, "OctoLibramMenuBindingKey" .. i, "Not bound", 126, 24)
+        row.keyButton:SetPoint("TOPLEFT", page, "TOPLEFT", 309, y - 13)
+        row.keyButton.bindingAction = row.action
+        row.keyButton:SetScript("OnClick", function() M:StartBindingCapture(this.bindingAction) end)
+        row.clearButton = button(page, "OctoLibramMenuBindingClear" .. i, "Clear", 55, 24)
+        row.clearButton:SetPoint("TOPLEFT", page, "TOPLEFT", 441, y - 13)
+        row.clearButton.bindingAction = row.action
+        row.clearButton:SetScript("OnClick", function() M:ClearBinding(this.bindingAction); M:SyncSettings() end)
+        hint(row.keyButton, "Assign shortcut", "Click, then press a key or a key with Alt, Ctrl, or Shift. Existing shortcuts are not overwritten. Keys are saved in the game's active account or character binding set.")
+        self.bindingRows[i] = row
+    end
+    self.bindingStatus = label(page, "", 27, -480, "GameFontHighlightSmall")
+    self.bindingStatus:SetWidth(468); self.bindingStatus:SetHeight(28); self.bindingStatus:SetJustifyH("LEFT")
+end
+
+function M:CreateSoundOptions(page)
+    self.soundChecks = {}
+    local entries = {
+        { "soundEnabled", "Play an alert sound", "Play one sound when a living hostile target enters the 35% health range. This is independent of the visual highlight." },
+        { "soundBossesOnly", "Bosses only", "Limit sound to the included raid/world-boss roster or targets classified as world bosses. The visual highlight still works on other enemies." }
+    }
+    for i, entry in ipairs(entries) do
+        local name = "OctoLibramMenuOption" .. entry[1]
+        local check = CreateFrame("CheckButton", name, page, "OptionsCheckButtonTemplate")
+        check:SetWidth(24); check:SetHeight(24)
+        check:SetPoint("TOPLEFT", page, "TOPLEFT", 25, -125 - (i - 1) * 38)
+        getglobal(name .. "Text"):SetText(entry[2])
+        check.optionKey = entry[1]
+        check:SetScript("OnClick", function()
+            local checked = this:GetChecked()
+            M:SetOption(this.optionKey, checked == 1 or checked == true)
+        end)
+        hint(check, entry[2], entry[3])
+        self.optionChecks[entry[1]], self.soundChecks[entry[1]] = check, check
+    end
+    local explanation = label(page, "The alert plays once when an eligible target enters the execute range.\nIt never equips a libram automatically.", 27, -215, "GameFontHighlightSmall")
+    explanation:SetWidth(468); explanation:SetJustifyH("LEFT")
+    label(page, "Alert sound", 27, -275)
+    self.soundChoiceButton = button(page, "OctoLibramMenuSoundChoice", "Choose a sound", 324, 28)
+    self.soundChoiceButton:SetPoint("TOPLEFT", page, "TOPLEFT", 27, -300)
+    self.soundPreviewButton = button(page, "OctoLibramMenuSoundPreview", "Play sample", 135, 28)
+    self.soundPreviewButton:SetPoint("TOPLEFT", page, "TOPLEFT", 361, -300)
+    self.soundPreviewButton:SetScript("OnClick", function() M:PlayAlertSound(true) end)
+    self.soundMenu = CreateFrame("Frame", "OctoLibramMenuSoundMenu", page)
+    self.soundMenu:SetWidth(324)
+    self.soundMenu:SetHeight(12 + table.getn(self.SOUNDS or {}) * 28)
+    self.soundMenu:SetPoint("TOPLEFT", self.soundChoiceButton, "BOTTOMLEFT", 0, -2)
+    self.soundMenu:SetFrameLevel(page:GetFrameLevel() + 8)
+    self.soundMenu:EnableMouse(true)
+    self.soundMenu:SetBackdrop({ bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
+        edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border", tile = true, tileSize = 16, edgeSize = 12,
+        insets = { left = 3, right = 3, top = 3, bottom = 3 } })
+    self.soundMenu:SetBackdropColor(0.05, 0.05, 0.05, 1)
+    self.soundButtons = {}
+    for i, sound in ipairs(self.SOUNDS or {}) do
+        local choice = button(self.soundMenu, "OctoLibramMenuSound" .. i, sound.name, 312, 24)
+        choice:SetPoint("TOPLEFT", self.soundMenu, "TOPLEFT", 6, -6 - (i - 1) * 28)
+        choice.soundID = sound.id
+        choice:SetScript("OnClick", function() M:SetOption("soundChoice", this.soundID); M.soundMenu:Hide() end)
+        self.soundButtons[i] = choice
+    end
+    self.soundMenu:Hide()
+    self.soundChoiceButton:SetScript("OnClick", function()
+        if M.soundMenu:IsVisible() then M.soundMenu:Hide() else M.soundMenu:Show() end
+    end)
+    local footnote = label(page, "Play sample works even when alerts are disabled, so you can preview\nthe sound before enabling it. Game sound settings still apply.", 27, -435, "GameFontHighlightSmall")
+    footnote:SetWidth(468); footnote:SetJustifyH("LEFT")
+end
+
 function M:CreateSettingsUI()
     if self.options then return end
     local panel = CreateFrame("Frame", "OctoLibramMenuOptions", UIParent)
     self.options = panel
-    panel:SetWidth(440); panel:SetHeight(520)
+    panel:SetWidth(520); panel:SetHeight(560)
     panel:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
     panel:SetFrameStrata("DIALOG")
     panel:SetMovable(true); panel:EnableMouse(true); panel:SetClampedToScreen(true)
@@ -176,10 +341,27 @@ function M:CreateSettingsUI()
     panel:SetScript("OnDragStart", function() this:StartMoving() end)
     panel:SetScript("OnDragStop", function() this:StopMovingOrSizing() end)
     panel:SetScript("OnShow", function() M:SyncSettings() end)
-    panel:SetScript("OnHide", function() GameTooltip:Hide(); this:StopMovingOrSizing() end)
+    panel:SetScript("OnHide", function()
+        GameTooltip:Hide(); this:StopMovingOrSizing()
+        if M.CancelBindingCapture then M:CancelBindingCapture() end
+        if M.soundMenu then M.soundMenu:Hide() end
+    end)
     label(panel, "OctoLibramMenu " .. self.VERSION, 25, -24, "GameFontNormalLarge")
     local subtitle = label(panel, "Settings are saved for this character and apply immediately.", 25, -50, "GameFontHighlightSmall")
-    subtitle:SetWidth(390); subtitle:SetJustifyH("LEFT")
+    subtitle:SetWidth(468); subtitle:SetJustifyH("LEFT")
+    self.optionTabs, self.optionPages = {}, {}
+    local tabNames = { "general", "bindings", "sound" }
+    for i, name in ipairs(tabNames) do
+        local tab = button(panel, "OctoLibramMenuTab" .. name, name, 150, 26)
+        tab:SetPoint("TOPLEFT", panel, "TOPLEFT", 27 + (i - 1) * 160, -74)
+        tab.optionTab = name
+        tab:SetScript("OnClick", function() M:SelectOptionsTab(this.optionTab) end)
+        self.optionTabs[name] = tab
+        local page = CreateFrame("Frame", "OctoLibramMenuPage" .. name, panel)
+        page:SetAllPoints(panel)
+        self.optionPages[name] = page
+    end
+    local general = self.optionPages.general
     self.optionChecks = {}
     local checks = {
         { "shown", "Show libram panel", "Show the equipped libram and its selection menu." },
@@ -191,9 +373,9 @@ function M:CreateSettingsUI()
     }
     for i, entry in ipairs(checks) do
         local name = "OctoLibramMenuOption" .. entry[1]
-        local check = CreateFrame("CheckButton", name, panel, "OptionsCheckButtonTemplate")
+        local check = CreateFrame("CheckButton", name, general, "OptionsCheckButtonTemplate")
         check:SetWidth(24); check:SetHeight(24)
-        check:SetPoint("TOPLEFT", panel, "TOPLEFT", 25, -80 - (i - 1) * 28)
+        check:SetPoint("TOPLEFT", general, "TOPLEFT", 25, -120 - (i - 1) * 28)
         getglobal(name .. "Text"):SetText(entry[2])
         check.optionKey = entry[1]
         check:SetScript("OnClick", function()
@@ -203,15 +385,15 @@ function M:CreateSettingsUI()
         hint(check, entry[2], entry[3])
         self.optionChecks[entry[1]] = check
     end
-    local separator = panel:CreateTexture(nil, "ARTWORK")
+    local separator = general:CreateTexture(nil, "ARTWORK")
     separator:SetTexture(0.6, 0.5, 0.25, 0.5)
     separator:SetHeight(1)
-    separator:SetPoint("TOPLEFT", panel, "TOPLEFT", 25, -258)
-    separator:SetPoint("TOPRIGHT", panel, "TOPRIGHT", -25, -258)
+    separator:SetPoint("TOPLEFT", general, "TOPLEFT", 25, -298)
+    separator:SetPoint("TOPRIGHT", general, "TOPRIGHT", -25, -298)
     local function slider(name, key, min, max, step, y, low, high)
-        local control = CreateFrame("Slider", name, panel, "OptionsSliderTemplate")
-        control:SetWidth(370); control:SetHeight(16)
-        control:SetPoint("TOPLEFT", panel, "TOPLEFT", 35, y)
+        local control = CreateFrame("Slider", name, general, "OptionsSliderTemplate")
+        control:SetWidth(450); control:SetHeight(16)
+        control:SetPoint("TOPLEFT", general, "TOPLEFT", 35, y)
         control:SetMinMaxValues(min, max); control:SetValueStep(step)
         control.optionKey, control.optionStep = key, step
         getglobal(name .. "Low"):SetText(low)
@@ -223,25 +405,28 @@ function M:CreateSettingsUI()
         end)
         return control
     end
-    self.scaleSlider = slider("OctoLibramMenuScale", "scale", 0.6, 2, 0.05, -290, "60%", "200%")
-    self.columnsSlider = slider("OctoLibramMenuColumns", "columns", 1, 8, 1, -344, "1", "8")
-    label(panel, "Menu direction", 27, -383)
-    self.directionLeft = button(panel, "OctoLibramMenuDirectionLeft", "Left", 100, 24)
-    self.directionRight = button(panel, "OctoLibramMenuDirectionRight", "Right", 100, 24)
-    self.directionLeft:SetPoint("TOPLEFT", panel, "TOPLEFT", 178, -378)
-    self.directionRight:SetPoint("TOPLEFT", panel, "TOPLEFT", 284, -378)
+    self.scaleSlider = slider("OctoLibramMenuScale", "scale", 0.6, 2, 0.05, -330, "60%", "200%")
+    self.columnsSlider = slider("OctoLibramMenuColumns", "columns", 1, 8, 1, -384, "1", "8")
+    label(general, "Menu direction", 27, -423)
+    self.directionLeft = button(general, "OctoLibramMenuDirectionLeft", "Left", 120, 24)
+    self.directionRight = button(general, "OctoLibramMenuDirectionRight", "Right", 120, 24)
+    self.directionLeft:SetPoint("TOPLEFT", general, "TOPLEFT", 218, -418)
+    self.directionRight:SetPoint("TOPLEFT", general, "TOPLEFT", 344, -418)
     self.directionLeft:SetScript("OnClick", function() M:SetOption("direction", "LEFT") end)
     self.directionRight:SetScript("OnClick", function() M:SetOption("direction", "RIGHT") end)
-    local footer = label(panel, "Alt / Ctrl / Shift + drag: move the unlocked panel.\nFinal Judgement is equipped only when you click.", 27, -425, "GameFontHighlightSmall")
-    footer:SetWidth(386); footer:SetJustifyH("LEFT")
-    self.resetButton = button(panel, "OctoLibramMenuResetPosition", "Reset position", 140, 24)
-    self.resetButton:SetPoint("BOTTOMLEFT", panel, "BOTTOMLEFT", 27, 22)
+    local footer = label(general, "Alt / Ctrl / Shift + drag: move the unlocked panel.\nEquipment changes only on your click or key press.", 27, -465, "GameFontHighlightSmall")
+    footer:SetWidth(468); footer:SetJustifyH("LEFT")
+    self.resetButton = button(general, "OctoLibramMenuResetPosition", "Reset position", 140, 24)
+    self.resetButton:SetPoint("BOTTOMLEFT", general, "BOTTOMLEFT", 27, 22)
     self.resetButton:SetScript("OnClick", function() M:ResetPosition() end)
     local close = button(panel, "OctoLibramMenuOptionsClose", "Close", 100, 24)
     close:SetPoint("BOTTOMRIGHT", panel, "BOTTOMRIGHT", -27, 22)
     close:SetScript("OnClick", function() M.options:Hide() end)
     self.optionsClose = close
+    self:CreateBindingOptions(self.optionPages.bindings)
+    self:CreateSoundOptions(self.optionPages.sound)
     table.insert(UISpecialFrames, "OctoLibramMenuOptions")
+    self:SelectOptionsTab("general")
     panel:Hide()
     self:CreateMinimapButton()
     self:InstallGameMenuButton()

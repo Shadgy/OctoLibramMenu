@@ -1,57 +1,67 @@
-# OctoLibramMenu
+# OctoLibramMenu 0.3.0
 
-A compact libram menu for paladins on **OctoWoW, WoW 1.12.1 / Interface 11200**. Inspired by the hover-and-click workflow of TrinketMenu.
+A compact paladin libram menu for **OctoWoW, WoW 1.12.1 / Interface 11200**. All addon messages, tooltips, settings and binding labels are in English.
 
-## Install with Octo Launcher
+## Install or update
 
-1. Open the launcher's **Addons** tab.
-2. Use **+** to add a custom Git addon.
-3. Paste this repository URL and choose **Install**:
+In **Octo Launcher → Addons → +**, add this custom Git addon:
 
-   `https://github.com/Shadgy/OctoLibramMenu`
+`https://github.com/Shadgy/OctoLibramMenu`
 
-Restart the game after the first installation. For manual installation, extract the release ZIP so that `Interface/AddOns/OctoLibramMenu/OctoLibramMenu.toc` exists.
+For manual installation, extract the release ZIP so that `Interface/AddOns/OctoLibramMenu/OctoLibramMenu.toc` exists. Replace the addon files when updating; keep your `WTF` folder and saved settings. **Restart the game after installing 0.3.0**, which adds new Lua modules and native key-binding actions.
 
-## Features
+The addon loads its UI only for paladins. Existing position, scale, visibility and menu settings are preserved. Sound is disabled by default; no default keys are assigned.
 
-- Equipped libram button and a hover menu of librams carried in your bags.
-- Click a libram to equip it in slot 18.
-- **Libram of Final Judgement reminder at target health ≤35%.** A separate gold-highlighted shortcut appears beside the equipped button, **even when the hover menu is closed**. If Final Judgement is already equipped, the equipped button glows instead.
-- Settings through **ESC → LibramMenu**, right-clicking the minimap button, or `/olm`.
-- Persistent menu, position lock, scale, columns, direction, tooltips, minimap visibility and reminder toggle.
-- Per-character settings preserved across updates.
+## Libram menu and Final Judgement
 
-The reminder requires a **living, attackable target**, Final Judgement in your bags or equipped, and the panel and reminder enabled. It clears above 35%, on target loss, on a friendly target, or when the target dies. The threshold includes exactly 35%; it does not round a higher health percentage down.
+- Hover the equipped libram to open the bag-libram menu; click an item to equip it in slot 18.
+- Right-click the equipped icon to keep the menu open or return to hover mode.
+- A living, attackable target at **35% health or lower** highlights **Libram of Final Judgement**. A separate gold shortcut stays available even when the hover menu is closed.
+- If Final Judgement is already equipped, the equipped button glows instead. Above 35%, on a friendly/dead/missing target, or without the item in your bags/equipment, the visual reminder clears.
+- The panel and visual reminder must be enabled for the shortcut to appear. The bank is not scanned.
+- Alt, Ctrl **or** Shift + left-drag moves the unlocked panel. Ordinary Shift-click with the chat edit box open still inserts an item link.
 
-The addon never changes equipment automatically. Click the highlighted shortcut or use its key binding to request a swap. Normal client/server equipment restrictions and cooldowns apply.
+Equipment changes require your click or key press. The addon never rotates or equips librams automatically. Normal client/server restrictions and cooldowns still apply.
 
-## Controls
+## Settings
 
-| Action | Result |
-|---|---|
-| Hover equipped libram | Open the bag-libram menu |
-| Click a menu libram or Final Judgement shortcut | Equip that libram |
-| Right-click equipped libram | Keep menu open / return to hover mode |
-| Alt, Ctrl **or** Shift + left-drag | Move the panel while unlocked |
-| Shift-click with chat edit box open | Insert an item link |
-| Left-click minimap button | Show / hide the libram panel |
-| Right-click minimap button | Open settings |
-| Drag minimap button | Move it while unlocked |
+Open **ESC → LibramMenu**, right-click the minimap button, or type `/olm`.
 
-The **Locked** setting blocks panel and minimap movement. pfUI may collect the minimap button into its own addon-button panel.
+**General** controls panel visibility, **Librams always shown**, **Locked**, minimap visibility, tooltips, visual highlighting, scale, columns, direction and reset position. Locked prevents moving the panel and minimap icon. Left-click the minimap icon to show/hide the panel; drag it around the minimap while unlocked. pfUI may collect it into its own addon-button panel.
 
-## Commands and key bindings
+### Key bindings
 
-`/olm` opens settings. `/olm help` lists commands.
+The **Key bindings** tab offers:
+
+- **Four configurable libram slots:** select a carried/equipped libram with the arrows, click its key button, then press a key or an Alt/Ctrl/Shift combination.
+- **Equip Final Judgement:** a dedicated direct shortcut.
+- **Cycle: Final Judgement ↔ selected libram:** choose the second libram and assign a key. Each press makes one swap. If Final Judgement is equipped, the partner is selected; otherwise Final Judgement is selected. Both items must be carried/equipped. A pending or rejected swap does not advance a hidden cycle counter.
+- **Pin / unpin libram menu:** change between persistent and hover mode.
+
+**Escape** cancels key capture. **Backspace** clears that action while capturing; each row also has **Clear**. Existing shortcuts assigned to another game action are refused, so they cannot be overwritten accidentally. Keys use the game's currently active account or character binding set. Libram selections are saved per character. Closing the dialog or changing tabs ends key capture.
+
+The same actions are available under **OctoLibramMenu** in the game's native Key Bindings menu. Missing configured items remain listed and produce a message when you try to equip them.
+
+### Sound
+
+The **Sound** tab includes **Play an alert sound**, **Bosses only**, a choice of **Ping**, **Soft ping** or **Bell**, and **Play sample**.
+
+A ping plays once when a living hostile target enters **≤35% HP**, including when a newly selected target is already below the threshold. Repeated HP events and timer updates do not repeat it. Healing above 35% rearms the next crossing. Changing sound settings while the same target remains below the threshold does not replay the alert; use Play sample to preview it.
+
+Sound is independent of panel visibility, the visual-highlighting switch and Final Judgement ownership. It is a health cue and does not equip anything. Game sound settings still apply.
+
+**Bosses only** uses [105 bosses and phase units](BOSSES.md) from the supplied Octo raid reference, plus the client's `worldboss` classification. The auxiliary Chess Knight is excluded. NPC IDs are preferred when a compatible GUID API is available, with enUS boss names as a fallback. The generic Chess name **King** is excluded from name-only matching; players and player-controlled pets are excluded. This list covers the supplied raid/world-boss reference, not every dungeon boss.
+
+## Commands
+
+`/olm` opens settings; `/olm help` lists commands.
 
 `/olm show`, `/olm hide`, `/olm lock`, `/olm unlock`, `/olm keepopen`, `/olm minimap`, `/olm left`, `/olm right`, `/olm scale 1.2`, `/olm columns 4`, `/olm reset`.
 
-`/olm final` manually equips Final Judgement, regardless of target health. The game's key-binding menu includes **OctoLibramMenu** actions for this swap and for keeping the menu open.
+`/olm final` manually requests Final Judgement, regardless of target health. `/olm cycle` uses the configured two-item cycle.
 
-## Compatibility and checks
+## Compatibility and reporting
 
-Version **0.2.1** uses the Vanilla Lua 5.0 API and requires no external addon library. It loads its UI only for paladins. The current item-name filtering targets the enUS client. Nampower health fields are optional; standard target health APIs are the fallback.
+The addon targets Vanilla Lua 5.0 and requires no external addon library. Item-name fallback targets the enUS client. Nampower/SuperWoW GUID and health APIs are optional; standard client APIs are used when available extensions do not provide valid values.
 
-**46 automated behavioral checks pass**, covering the exact health boundary, closed-menu alert visibility, target changes, inventory changes, movement modifiers, settings, and manual-swap safeguards. A live Octo client check also confirmed the closed-menu shortcut and a successful manual swap during combat. See [VALIDATION.md](VALIDATION.md) for the scope of these checks.
-
-Report reproducible problems in this repository's **Issues**, including the addon version, what you expected, and what happened. Do not include account credentials or private SavedVariables files.
+Report reproducible problems through the repository's Issues, including the addon version and the steps to reproduce. Keep credentials and private SavedVariables out of public reports.

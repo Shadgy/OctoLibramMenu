@@ -5,4 +5,9 @@
     <Binding name="OCTOLIBRAMMENU_TOGGLE">
         if OctoLibramMenu.ready then OctoLibramMenu:Slash("keepopen"); end
     </Binding>
+    <Binding name="OCTOLIBRAMMENU_CYCLE">OctoLibramMenu:CycleLibram();</Binding>
+    <Binding name="OCTOLIBRAMMENU_ITEM1">OctoLibramMenu:EquipBoundItem(1);</Binding>
+    <Binding name="OCTOLIBRAMMENU_ITEM2">OctoLibramMenu:EquipBoundItem(2);</Binding>
+    <Binding name="OCTOLIBRAMMENU_ITEM3">OctoLibramMenu:EquipBoundItem(3);</Binding>
+    <Binding name="OCTOLIBRAMMENU_ITEM4">OctoLibramMenu:EquipBoundItem(4);</Binding>
 </Bindings>

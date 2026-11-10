@@ -1,10 +1,12 @@
 ## Interface: 11200
 ## Title: OctoLibramMenu
 ## Author: Octo
-## Version: 0.2.1
-## Notes: Libram flyout and Final Judgement reminder at target health <=35%. /olm
+## Version: 0.3.0
+## Notes: Libram menu, configurable key bindings, and a 35% health reminder with optional boss-only sound. /olm
 ## SavedVariablesPerCharacter: OctoLibramMenuDB
+Bosses.lua
 Core.lua
 UI.lua
+Bindings.lua
 Options.lua
 Bindings.xml

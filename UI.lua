@@ -1,7 +1,9 @@
 local M = OctoLibramMenu
 BINDING_HEADER_OCTOLIBRAMMENU = "OctoLibramMenu"
-BINDING_NAME_OCTOLIBRAMMENU_FINAL = "Zaloz Libram of Final Judgement"
-BINDING_NAME_OCTOLIBRAMMENU_TOGGLE = "Przypnij / odepnij menu libramow"
+BINDING_NAME_OCTOLIBRAMMENU_FINAL = "Equip Libram of Final Judgement"
+BINDING_NAME_OCTOLIBRAMMENU_TOGGLE = "Keep libram menu open / hover mode"
+BINDING_NAME_OCTOLIBRAMMENU_CYCLE = "Cycle Final Judgement / selected libram"
+for i = 1, 4 do _G["BINDING_NAME_OCTOLIBRAMMENU_ITEM" .. i] = "Equip configured libram " .. i end
 
 local function backdrop(frame)
     frame:SetBackdrop({ bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
@@ -56,13 +58,13 @@ function M:Tooltip(button)
         GameTooltip:SetInventoryItem("player", self.SLOT)
     elseif button.item and button.item.bag ~= nil then
         GameTooltip:SetBagItem(button.item.bag, button.item.slot)
-    else GameTooltip:SetText("Libramy") end
+    else GameTooltip:SetText("Librams") end
     if button.role == "final" then
-        GameTooltip:AddLine("Cel ma 35% HP lub mniej. Kliknij, aby zalozyc.", 1, 0.82, 0.2, true)
+        GameTooltip:AddLine("Target health is 35% or lower. Click to equip.", 1, 0.82, 0.2, true)
     elseif button.role == "main" then
-        GameTooltip:AddLine("Najedz: wybor libramu. PPM: przypnij menu.", 0.8, 0.8, 0.8, true)
-        GameTooltip:AddLine("Alt / Ctrl / Shift + przeciagniecie: przesun panel.", 0.8, 0.8, 0.8, true)
-    else GameTooltip:AddLine("Kliknij, aby zalozyc libram.", 0.8, 0.8, 0.8, true) end
+        GameTooltip:AddLine("Hover to select a libram. Right-click to keep the menu open.", 0.8, 0.8, 0.8, true)
+        GameTooltip:AddLine("Alt / Ctrl / Shift + drag to move the panel.", 0.8, 0.8, 0.8, true)
+    else GameTooltip:AddLine("Click to equip this libram.", 0.8, 0.8, 0.8, true) end
     GameTooltip:Show()
     self.tooltipButton = button
 end
