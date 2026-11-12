@@ -1,4 +1,4 @@
-# Sound sources — 0.3.2
+# Sound sources
 
 The active picker contains eleven short alert recordings. **LoL - Retreat Ping** is the default. Original game and brand names identify the recordings and do not imply endorsement.
 
@@ -19,6 +19,8 @@ The active picker contains eleven short alert recordings. **LoL - Retreat Ping**
 ## Audio preparation
 
 Sources were decoded to mono, resampled to 22,050 Hz and saved as 16-bit PCM WAV for the older WoW client. Leading/trailing silence was trimmed, except for the already-short default LoL recording, which keeps its full natural decay. Levels were adjusted toward -20 dBFS whole-cue RMS with a -3 dBFS sample-peak ceiling; brief onset and tail fades avoid discontinuities. Warning Siren was shortened to 2.9 seconds with a tail fade. The other recordings were not length-limited. There is no streaming or download during gameplay.
+
+Version 0.3.3 adds pre-adjusted copies of these same recordings in `Volume/`. This lets the older client vary alert volume without changing game-wide audio settings. The 100% files retain the original release levels. Louder copies use a smooth peak limit to avoid clipping. These level adjustments use the source recordings and attribution listed here.
 
 ## Ownership and attribution
 

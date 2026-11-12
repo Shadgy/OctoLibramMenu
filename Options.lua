@@ -28,6 +28,22 @@ local function button(parent, name, text, width, height)
     return result
 end
 
+local function slider(parent, name, key, minimum, maximum, step, y, low, high)
+    local control = CreateFrame("Slider", name, parent, "OptionsSliderTemplate")
+    control:SetWidth(450); control:SetHeight(16)
+    control:SetPoint("TOPLEFT", parent, "TOPLEFT", 35, y)
+    control:SetMinMaxValues(minimum, maximum); control:SetValueStep(step)
+    control.optionKey, control.optionStep = key, step
+    getglobal(name .. "Low"):SetText(low)
+    getglobal(name .. "High"):SetText(high)
+    control:SetScript("OnValueChanged", function()
+        if M.syncingOptions then return end
+        local value = math.floor(this:GetValue() / this.optionStep + 0.5) * this.optionStep
+        M:SetOption(this.optionKey, value)
+    end)
+    return control
+end
+
 function M:OpenOptions()
     if not self.ready then return end
     if not self.options then self:CreateSettingsUI() end
@@ -44,8 +60,10 @@ function M:SyncSettings()
     for key, check in pairs(self.optionChecks) do check:SetChecked(self.db[key] and 1 or nil) end
     self.scaleSlider:SetValue(self.db.scale)
     self.columnsSlider:SetValue(self.db.columns)
+    self.soundVolumeSlider:SetValue(self.db.soundVolume)
     getglobal("OctoLibramMenuScaleText"):SetText("Scale: " .. math.floor(self.db.scale * 100 + 0.5) .. "%")
     getglobal("OctoLibramMenuColumnsText"):SetText("Menu columns: " .. self.db.columns)
+    getglobal("OctoLibramMenuSoundVolumeText"):SetText("Alert volume: " .. self.db.soundVolume .. "%")
     self.directionLeft:SetText(self.db.direction == "LEFT" and "|cffffd166Left|r" or "Left")
     self.directionRight:SetText(self.db.direction == "RIGHT" and "|cffffd166Right|r" or "Right")
     if self.bindingRows then
@@ -299,6 +317,8 @@ function M:CreateSoundOptions(page)
     self.soundPreviewButton = button(page, "OctoLibramMenuSoundPreview", "Play sample", 135, 28)
     self.soundPreviewButton:SetPoint("TOPLEFT", page, "TOPLEFT", 361, -300)
     self.soundPreviewButton:SetScript("OnClick", function() M:PlayAlertSound(true) end)
+    self.soundVolumeSlider = slider(page, "OctoLibramMenuSoundVolume", "soundVolume", 0, 200, 10, -370, "0%", "200%")
+    hint(self.soundVolumeSlider, "Alert volume", "Adjust the volume of the alert and sample. Set it to 0% to mute them.")
     self.soundMenu = CreateFrame("Frame", "OctoLibramMenuSoundMenu", page)
     self.soundMenu:SetWidth(468)
     self.soundMenu:SetHeight(12 + math.ceil(table.getn(self.SOUNDS or {}) / 2) * 28)
@@ -395,23 +415,8 @@ function M:CreateSettingsUI()
     separator:SetHeight(1)
     separator:SetPoint("TOPLEFT", general, "TOPLEFT", 25, -298)
     separator:SetPoint("TOPRIGHT", general, "TOPRIGHT", -25, -298)
-    local function slider(name, key, min, max, step, y, low, high)
-        local control = CreateFrame("Slider", name, general, "OptionsSliderTemplate")
-        control:SetWidth(450); control:SetHeight(16)
-        control:SetPoint("TOPLEFT", general, "TOPLEFT", 35, y)
-        control:SetMinMaxValues(min, max); control:SetValueStep(step)
-        control.optionKey, control.optionStep = key, step
-        getglobal(name .. "Low"):SetText(low)
-        getglobal(name .. "High"):SetText(high)
-        control:SetScript("OnValueChanged", function()
-            if M.syncingOptions then return end
-            local value = math.floor(this:GetValue() / this.optionStep + 0.5) * this.optionStep
-            M:SetOption(this.optionKey, value)
-        end)
-        return control
-    end
-    self.scaleSlider = slider("OctoLibramMenuScale", "scale", 0.6, 2, 0.05, -330, "60%", "200%")
-    self.columnsSlider = slider("OctoLibramMenuColumns", "columns", 1, 8, 1, -384, "1", "8")
+    self.scaleSlider = slider(general, "OctoLibramMenuScale", "scale", 0.6, 2, 0.05, -330, "60%", "200%")
+    self.columnsSlider = slider(general, "OctoLibramMenuColumns", "columns", 1, 8, 1, -384, "1", "8")
     label(general, "Menu direction", 27, -423)
     self.directionLeft = button(general, "OctoLibramMenuDirectionLeft", "Left", 120, 24)
     self.directionRight = button(general, "OctoLibramMenuDirectionRight", "Right", 120, 24)

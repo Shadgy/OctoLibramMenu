@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.3
+
+- Add **Alert volume** in the Sound tab with 0–200% in 10% steps. The slider controls automatic pings and **Play sample** without changing game volume.
+- Existing characters start at 100% with the same ping level as before. At 0%, both playback paths are muted. The volume is saved per character.
+- Restart the game after updating to load the new audio files.
+
 ## 0.3.2
 
 - Replace the active Kenney picker with eleven recognizable game, pop-culture and raid-alert recordings.

@@ -1,4 +1,4 @@
-# OctoLibramMenu 0.3.2
+# OctoLibramMenu 0.3.3
 
 A compact paladin libram menu for **OctoWoW, WoW 1.12.1 / Interface 11200**. All addon messages, tooltips, settings and binding labels are in English.
 
@@ -47,6 +47,8 @@ The same actions are available under **OctoLibramMenu** in the game's native Key
 The **Sound** tab includes **Play an alert sound**, **Bosses only**, eleven short recordings, and **Play sample**. **LoL - Retreat Ping** is the default. Other choices are **Metal Gear - Alert**, **Mortal Kombat - Finish Him**, **Mario - Coin**, **Sonic - Ring**, **Vine Boom**, **Windows XP - Error**, **Law and Order - Dun Dun**, **Air Horn**, **Boxing Arena Gong** and **Warning Siren**. The picker shows all eleven in two columns.
 
 Each recording is shorter than three seconds and uses mono 16-bit PCM WAV for the older client. See [sound sources, ownership and attribution](Sounds/SOURCES.md). Retired Kenney sound selections migrate to the new LoL default; position, keys, sound enable/boss-only switches and other preferences are preserved. Once you select one of the new sounds, it remains selected on later logins. Sound remains disabled on a fresh installation until you enable it.
+
+Use **Alert volume** to adjust the selected ping from **0% to 200%** in 10% steps. **100%** keeps the previous level and is the default for existing settings. **0%** mutes the automatic alert and its sample. The volume is saved per character and applies to both the alert and **Play sample**. The game's volume settings still apply.
 
 A ping plays once when a living hostile target enters **≤35% HP**, including when a newly selected target is already below the threshold. Repeated HP events and timer updates do not repeat it. Healing above 35% rearms the next crossing. Changing sound settings while the same target remains below the threshold does not replay the alert; use Play sample to preview it.
 

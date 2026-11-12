@@ -1,5 +1,5 @@
 -- WoW 1.12 / Lua 5.0. No automatic equipment changes.
-OctoLibramMenu = { VERSION = "0.3.2", SLOT = 18, FINAL_ID = 58240,
+OctoLibramMenu = { VERSION = "0.3.3", SLOT = 18, FINAL_ID = 58240,
     FINAL_NAME = "Libram of Final Judgement", items = {}, elapsed = 0, scanElapsed = 0 }
 local M = OctoLibramMenu
 M.SOUNDS = {
@@ -15,6 +15,14 @@ M.SOUNDS = {
     { id = "GONG", name = "Boxing Arena Gong", sound = "Interface\\AddOns\\OctoLibramMenu\\Sounds\\BoxingGong.wav" },
     { id = "SIREN", name = "Warning Siren", sound = "Interface\\AddOns\\OctoLibramMenu\\Sounds\\WarningSiren.wav" }
 }
+
+local function normalizeSoundVolume(value)
+    value = tonumber(value)
+    -- Subtracting a non-finite value from itself gives NaN, including on Lua 5.0.
+    if not value or value - value ~= 0 then return nil end
+    value = math.max(0, math.min(200, value))
+    return math.floor(value / 10 + 0.5) * 10
+end
 
 function M:Message(text)
     if DEFAULT_CHAT_FRAME then DEFAULT_CHAT_FRAME:AddMessage("|cffffd166OctoLibramMenu:|r " .. text) end
@@ -137,6 +145,8 @@ function M:IsBossTarget()
 end
 
 function M:PlayAlertSound(preview)
+    local volume = self.db.soundVolume
+    if volume == 0 then return false end
     local selected
     for _, sound in ipairs(self.SOUNDS) do if sound.id == self.db.soundChoice then selected = sound; break end end
     selected = selected or self.SOUNDS[1]
@@ -144,7 +154,12 @@ function M:PlayAlertSound(preview)
         if preview then self:Message("Sound playback is unavailable in this client.") end
         return false
     end
-    local ok, result = pcall(PlaySoundFile, selected.sound)
+    local path = selected.sound
+    if volume ~= 100 then
+        -- The Vanilla client plays custom files at their encoded volume.
+        path = string.gsub(path, "\\Sounds\\", "\\Sounds\\Volume\\" .. volume .. "\\", 1)
+    end
+    local ok, result = pcall(PlaySoundFile, path)
     if not ok or result == false then
         if preview then self:Message("The sound could not be played. Check the game's sound settings.") end
         return false
@@ -231,6 +246,7 @@ function M:Initialize()
     local validSound = false
     for _, sound in ipairs(self.SOUNDS) do if self.db.soundChoice == sound.id then validSound = true; break end end
     if not validSound then self.db.soundChoice = "LOL" end
+    self.db.soundVolume = normalizeSoundVolume(self.db.soundVolume) or 100
     self.db.scale = math.max(0.6, math.min(2, tonumber(self.db.scale) or 1))
     self.db.columns = math.max(1, math.min(8, math.floor(tonumber(self.db.columns) or 4)))
     if self.db.direction ~= "LEFT" then self.db.direction = "RIGHT" end
@@ -262,6 +278,13 @@ end
 
 function M:SetOption(key, value)
     if not self.ready then return false end
+    if key == "soundVolume" then
+        value = normalizeSoundVolume(value)
+        if not value then return false end
+        self.db.soundVolume = value
+        if self.SyncSettings then self:SyncSettings() end
+        return true
+    end
     if key == "shown" or key == "keepOpen" or key == "locked" or key == "showMinimap"
         or key == "showTooltips" or key == "alertEnabled" or key == "soundEnabled" or key == "soundBossesOnly" then
         value = value == true or value == 1

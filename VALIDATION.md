@@ -2,6 +2,15 @@
 
 Checked on 2026-11-10.
 
+## 0.3.3 checks
+
+- **78 behavioral cases passed** on 2026-11-12, covering 35 core, 9 binding and 34 UI cases. Lua syntax and Vanilla compatibility checks passed.
+- The volume slider preserves saved levels, starts existing settings at 100%, and stays silent while it is moved. Automatic playback and **Play sample** use the selected level. Tests cover mute, a new health threshold event after adjustment, and selection of the matching WAV.
+- The Sound tab layout was rendered and checked with all eleven choices visible. The volume slider, sample button and footer fit.
+- All 209 gain variants preserve the source WAV format and duration. Measured RMS rises at each step for every cue and the peak stays below full scale. The 100% level uses the original WAVs.
+
+The 0.3.3 checks used simulated game APIs and measured WAV output. The live-client results below are from 0.3.2.
+
 ## 0.3.2 checks
 
 - **74 behavioral cases passed:** 32 core, 9 bindings and 33 UI integration cases. Lua syntax and the project's Lua 5.0 / Vanilla checks passed.
